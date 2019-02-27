@@ -19,7 +19,7 @@
     <meta name="description" content="description">
     <meta name="author" content="xiaohei">
     <meta name="keywords" content="keywords">
-    <title>regexp正则表达式使用规则 ~ 小黑的技术屋</title>
+    <title>生成助记词钱包 ~ 小黑的技术屋</title>
     <link rel="stylesheet" href="/css/Material_Icons.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
     <link rel="stylesheet" href="/css/main.css">
@@ -84,8 +84,8 @@
   <div class="page-header header-filter" data-parallax="false" style="background-image: url('/img/post-banner.jpg'); height: 70vh;">
     
       <div class="container">
-        <h1 class="title text-center post_title">regexp正则表达式使用规则</h1>
-        <p class="text-center"><b>Wednesday, February 27th 2019, 5:15 pm</b></p>
+        <h1 class="title text-center post_title">生成助记词钱包</h1>
+        <p class="text-center"><b>Sunday, March 25th 2018, 11:58 pm</b></p>
       </div>
     
   </div>
@@ -99,74 +99,54 @@
       <div class="container">
         <div class="section">
           <div class="post_content">
-              <h1 id="匹配字符元字符"><a href="#匹配字符元字符" class="headerlink" title="匹配字符元字符"></a>匹配字符元字符</h1><ol>
-<li><p>\d 匹配一个数字</p>
-<pre><code>    blic void testList() {
-    String s = &quot;007&quot;;
-    String regEx = &quot;00\\d&quot;;
-    Pattern pattern = Pattern.compile(regEx);
-    Matcher matcher = pattern.matcher(s);
-    System.out.println(matcher.matches());
-
-    // 输入007返回true输入00a返回false
-</code></pre></li>
-<li><p>\w 匹配一个字母或者是数字</p>
-<pre><code>    blic void testList() {
-    //007 or 00a
-    String s = &quot;00a&quot;;
-    String regEx = &quot;00\\w&quot;;
-    Pattern pattern = Pattern.compile(regEx);
-    Matcher matcher = pattern.matcher(s);
-    System.out.println(matcher.matches());
-
-    // 输入007或者00a返回都为true
-</code></pre></li>
-<li><p>. 可以匹配任意字符，代表的是字符</p>
-</li>
-<li><p>\s 可以匹配空格 换行</p>
-</li>
-<li><p>[] 表示适配一个字符范围 比如：[0-9z-zA-Z_] 表示字符串在为0-9的数字或者a-z的字母，或者是A-Z的字母，或者是下划线</p>
-<pre><code>  String s = &quot;&lt;string name=\&quot;mime_select\&quot;&gt;自选&lt;/string&gt;&quot;;
-  String regEx = &quot;&lt;string\\s[a-zA-Z\&quot;=_]+&gt;.*&lt;/string&gt;&quot;;
-  Pattern pattern = Pattern.compile(regEx);
-  Matcher matcher = pattern.matcher(s);
-  System.out.println(matcher.matches());
-  //return true
-</code></pre></li>
+              <p>刚开始对助记词有一个误解一直认为是助记词是从私钥生成的，私钥生成它导出助记词，助记词然后反向回去生成私钥。</p>
+<p>今天单拿出来研究，才发现正确的流程应该是这样的</p>
+<p><img src="/images/bip201803252337.jpg" alt="image"></p>
+<p>（图片来《自精通比特币（第二版）》）</p>
+<ol>
+<li>随机生成一个128位的熵，然后把熵转为12个单词(参考BIP39)</li>
 </ol>
-<h1 id="匹配数量的元字符"><a href="#匹配数量的元字符" class="headerlink" title="匹配数量的元字符"></a>匹配数量的元字符</h1><ol>
-<li>* 表示匹配任意个字符（包括0</li>
-<li>+ 表示至少有1个字符（不包括0）</li>
-<li>？表示0个或者1个，</li>
-<li>{n} 表示n个</li>
-<li>{n,m} 表示n到m个</li>
+<pre><code>byte[] random = new byte[128/8];
+new SecureRandom().nextBytes(random);
+MnemonicCode mnemonicCode = new MnemonicCode();
+List&lt;String&gt; strings = mnemonicCode.toMnemonic(random);
+</code></pre><p><img src="/images/bip201803252339.jpg" alt="image"></p>
+<ol start="2">
+<li>然后通过助记词生成一个种子(参考BIP39)</li>
 </ol>
-<h1 id="条件元字符"><a href="#条件元字符" class="headerlink" title="条件元字符"></a>条件元字符</h1><ol>
-<li>| 表示或者关系 A|B 匹配A或者B</li>
-<li>^ 表示已什么什么开头 ^[0-9] 以数字开头</li>
-<li>$ 表示以什么结尾</li>
+<pre><code>byte[] seed = MnemonicCode.toSeed(strings, &quot;&quot;);
+</code></pre><ol start="3">
+<li>将种子生成一个公钥私钥（参考BIP32,BIP44）</li>
 </ol>
-<h1 id="分组元字符"><a href="#分组元字符" class="headerlink" title="分组元字符"></a>分组元字符</h1><ol>
-<li><p>() 括号可以将括号内的内容分组 适用于内容的提取</p>
-<pre><code>     String s = &quot;&lt;!--登录页面--&gt;&quot;;
-     String regEx = &quot;\\s*&lt;!--(.*)--&gt;\\s*&quot;;
-     Pattern pattern = Pattern.compile(regEx);
-     Matcher matcher = pattern.matcher(s);
-     if (matcher.find()){
-         //下标取1取到括号内的值，下标为0 是他本身
-         System.out.println(matcher.group(1));
-     }else {
-         System.out.println(&quot;没有匹配&quot;);
-     }
-</code></pre></li>
-</ol>
+<pre><code>AddressIndex address = BIP44.m().purpose44()
+        .coinType(60)
+        .account(0)
+        .external()
+        .address(0);
+CoinPairDerive coinKeyPair = new CoinPairDerive(extendedKey);
+ExtendedKey child = coinKeyPair.deriveByExtendedKey(address);
+byte[] privateKey = child.getMaster().getPrivate();
+</code></pre><p>既然有了公钥私钥。那么钱包生成不就是简单一下钱包的构造方法不就出来了吗？（参考Web3j）</p>
+<pre><code>ECKeyPair  ecKeyPair = ECKeyPair.create(privateKey);
+Credentials credentials = Credentials.create(ecKeyPair);
+Log.e(&quot;私钥&quot;,Numeric.toHexStringWithPrefix(credentials.getEcKeyPair().getPrivateKey()));
+Log.e(&quot;地址&quot;,credentials.getAddress());
+</code></pre><p>查看结果并导入imtoken对比</p>
+<p><img src="/images/bip201803252342.jpg" alt="image"></p>
+<p><img src="/images/bip201803252344.jpg" alt="image"></p>
 
           </div>
           <br><br>
           <div>
               <p>
                        
+                      <span class="badge badge-default">#&nbsp;钱包</span>
+                      &nbsp;
+                       
                       <span class="badge badge-default">#&nbsp;Java</span>
+                      &nbsp;
+                       
+                      <span class="badge badge-default">#&nbsp;区块链</span>
                       &nbsp;
                       
               </p>
@@ -195,8 +175,8 @@
     <script>               
         var disqus_shortname = '';
         var disqus_config = function () {
-            this.page.url = 'http://yoursite.com/2019/02/27/regexp正则表达式使用规则/'; 
-            this.page.identifier = '/2019/02/27/regexp正则表达式使用规则/';
+            this.page.url = 'http://yoursite.com/2018/03/25/生成助记词钱包/'; 
+            this.page.identifier = '/2018/03/25/生成助记词钱包/';
         };
         (function() { 
             var d = document, s = d.createElement('script');

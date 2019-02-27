@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+
+
+
+
+
+
+
+
+
+<head><meta name="generator" content="Hexo 3.8.0">
+    <meta charset="utf-8">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no" name="viewport">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="description" content="description">
+    <meta name="author" content="xiaohei">
+    <meta name="keywords" content="keywords">
+    <title>解析钱包KeyStore文件 ~ 小黑的技术屋</title>
+    <link rel="stylesheet" href="/css/Material_Icons.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/main.css">
+    
+        <link rel="stylesheet" href="/css/post.css">
+        
+            <link rel="stylesheet" href="/css/Prettify/tomorrow-night-eighties.min.css">
+        
+    
+</head>
+
+<body class=" sidebar-collapse">
+<nav class="navbar navbar-transparent navbar-color-on-scroll fixed-top navbar-expand-lg" color-on-scroll="100" id="sectionsNav">
+    <div class="container">
+        <div class="navbar-translate">
+            <a class="navbar-brand" href="/">
+                小黑的技术屋</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="navbar-toggler-icon"></span>
+                <span class="navbar-toggler-icon"></span>
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ml-auto">
+                    
+                        
+                            <li class="nav-item">
+                                <a class="nav-link" href="/archives/">
+                                    archives
+                                </a>
+                            </li>
+                        
+                            <li class="nav-item">
+                                <a class="nav-link" href="/about/">
+                                    about
+                                </a>
+                            </li>
+                        
+                    
+                    
+                        
+                            <li class="nav-item">
+                                <a class="nav-link" rel="tooltip" title data-placement="bottom" href="https://github.com/ciscolxh" target="_blank" data-original-title="See me here">
+                                    <i class="fa fa-github"></i>
+                                </a>
+                            </li>
+                        
+                            <li class="nav-item">
+                                <a class="nav-link" rel="tooltip" title data-placement="bottom" href="https://twitter.com/" target="_blank" data-original-title="See me here">
+                                    <i class="fa fa-twitter"></i>
+                                </a>
+                            </li>
+                        
+                    
+                </ul>
+            </div>
+    </div>
+</nav>
+    
+  <div class="page-header header-filter" data-parallax="false" style="background-image: url('/img/post-banner.jpg'); height: 70vh;">
+    
+      <div class="container">
+        <h1 class="title text-center post_title">解析钱包KeyStore文件</h1>
+        <p class="text-center"><b>Sunday, March 25th 2018, 11:58 pm</b></p>
+      </div>
+    
+  </div>
+
+  
+  
+  
+    <div class="row" style="margin: 0 0 0; z-index: 999;">
+  <div class="col-md-8 offset-md-1">
+    <div class="main main-raised">
+      <div class="container">
+        <div class="section">
+          <div class="post_content">
+              <p>无论是从<a href="https://.com/" target="_blank" rel="noopener">MyEtherWallet</a> ，还是从市场中常见的钱包创建一个钱包，或是自己搭建一个主链，都可以导出一个keyStore 文件，<br>在刚接触钱包就知道keyStore是钱包加密后的表现形式。今天我们来看一看他是怎么加密钱包的。</p>
+<p>首先看一下keyStore的样子</p>
+<pre><code>{
+　　&quot;version&quot;:3,
+　　&quot;id&quot;:&quot;0010d1fd-fcaf-425e-8a34-990388be3ed9&quot;,
+　　&quot;address&quot;:&quot;address&quot;,
+　　&quot;Crypto&quot;:{
+　　　　&quot;ciphertext&quot;:&quot;73e2dd32843ab58356b93248bcde001db8d6aff091d888d1631ede1261bc3e403f&quot;,
+　　　　&quot;cipherparams&quot;:{
+　　　　　　&quot;iv&quot;:&quot;469f8eb7b10f3ca5f50ec75a8949c0ed&quot;
+　　　　},
+　　　　&quot;cipher&quot;:&quot;aes-128-ctr&quot;,
+　　　　&quot;kdf&quot;:&quot;scrypt&quot;,
+　　　　&quot;kdfparams&quot;:{
+　　　　　　&quot;dklen&quot;:32,
+　　　　　　&quot;salt&quot;:&quot;0a48fe56ed1fe152b6f85ab6ed537d819aa79782b45ab5b586f04315917501bd&quot;,
+　　　　　　&quot;n&quot;:262144,
+　　　　　　&quot;r&quot;:8,
+　　　　　　&quot;p&quot;:1
+　　　　},
+　　　　&quot;mac&quot;:&quot;3efa6c00d39b4f9719fea0486c32063711d3424465df4e7a9954c8abe5336355&quot;
+　　}
+}
+</code></pre><p>从这个文件中我们可以看出KeyStore生成的是一个JSON文件。并且一些重要的内容都保存在了”Crypto”下</p>
+<p>再看一Crypto的参数</p>
+<ul>
+<li>首先看到cipher这个参数为aes-128-ctr 说明是用的AES-128算法加密模式为ctr</li>
+<li>cipherparams参数里面包含了一个iv，那么就知道这个是加密参数向量了。</li>
+<li>ciphertext ，通过名字就能知道这是加密后的密文</li>
+<li>kdf （key derivatioin function）秘钥生成函数 </li>
+<li>kdfparams kdf的一些重要参数</li>
+<li>mac 用于验证密码。</li>
+</ul>
+<p>我们在使用AES加密的过程中知道，AES有加密模式，向量，密码。上面kdf又是什么鬼。</p>
+<p>在这次AES加密中没有直接使用我们输入的密码去做加密。而是用我们输入的密码使用kdf派生出来一个秘钥。然后通过这个派生秘钥去加密</p>
+<p>最后一个参数mac是校验我们输入的密码和密文是否匹配。</p>
+<h4 id="加密的完整流程"><a href="#加密的完整流程" class="headerlink" title="加密的完整流程"></a>加密的完整流程</h4><ol>
+<li>生成一个随机数，作为盐，对密码进行加密生成派生秘钥</li>
+<li>然后从派生秘钥中截取16位字符作为密码</li>
+<li>再生成一个16位的随机数作为向量，</li>
+<li>然后拿着生成的密码，向量，私钥进行加密得到密文</li>
+<li>最后拿着生成的密文，和派生秘钥做hase处理作为校验码</li>
+</ol>
+<h4 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h4><pre><code>byte[] salt = generateRandomBytes(32);
+        byte[] derivedKey = generateDerivedScryptKey(
+                password.getBytes(Charset.forName(&quot;UTF-8&quot;)),
+                salt,
+                N_STANDARD,
+                R,
+                P_STANDARD, DKLEN
+        );
+        byte[] encryptKey = Arrays.copyOfRange(derivedKey, 0, 16);
+        byte[] iv = generateRandomBytes(16);
+        byte[] privateKeyBytes = ByteUtil.bigIntegerToBytes(new BigInteger(privateKey, 16));
+        byte[] cipherText = performCipherOperation(Cipher.ENCRYPT_MODE, iv, encryptKey, privateKeyBytes);
+        byte[] mac = generateMac(derivedKey, cipherText);
+</code></pre><pre><code>private static byte[] performCipherOperation(int encryptMode, byte[] iv, byte[] encryptKey, byte[] privateKeyBytes) throws Exception {
+        try {
+            IvParameterSpec ivParameterSpec = new IvParameterSpec(iv);
+            Cipher cipher = Cipher.getInstance(&quot;AES/CTR/NoPadding&quot;);
+            SecretKeySpec secretKeySpec = new SecretKeySpec(encryptKey, &quot;AES&quot;);
+            cipher.init(encryptMode, secretKeySpec, ivParameterSpec);
+            return cipher.doFinal(privateKeyBytes);
+        } catch (Exception e) {
+            return throwException(e);
+        }
+    }
+
+</code></pre><pre><code>  private static byte[] generateMac(byte[] derivedKey, byte[] cipherText) {
+        byte[] result = new byte[16 + cipherText.length];
+        System.arraycopy(derivedKey, 16, result, 0, 16);
+        System.arraycopy(cipherText, 0, result, 16, cipherText.length);
+        return Hash.sha3(result);
+    }
+</code></pre><h4 id="解密需要用的得内容"><a href="#解密需要用的得内容" class="headerlink" title="解密需要用的得内容"></a>解密需要用的得内容</h4><ul>
+<li>AES是对称加密，所以我们需要加密时候的加密秘钥</li>
+</ul>
+<blockquote>
+<blockquote>
+<pre><code>我们的加密秘钥是通过我们输入的密码用fdf的算法生成的，而生成的KeyStore里保存了完整的keyStore信息。所以我们还可以通过kdf以及加密时候的参数对这个算法达到我们要的派生秘钥
+</code></pre></blockquote>
+</blockquote>
+<blockquote>
+<blockquote>
+<pre><code>WalletEntity.CryptoBean.KdfparamsBean scryptKdfParams = crypto.getKdfparams();
+        int dklen = scryptKdfParams.getDklen();
+        int n = scryptKdfParams.getN();
+        int p = scryptKdfParams.getP();
+        int r = scryptKdfParams.getR();
+        byte[] salt = Numeric.hexStringToByteArray(scryptKdfParams.getSalt());
+        derivedKey = generateDerivedScryptKey(
+                password.getBytes(Charset.forName(&quot;UTF-8&quot;)), salt, n, r, p, dklen);
+</code></pre></blockquote>
+</blockquote>
+<ul>
+<li><p>要获得加密后的密文</p>
+<p> 上面对KeyStore结构分析时候已经找到，他就存在ciphertext这个字段下</p>
+</li>
+<li><p>加密时候用到的向量</p>
+<p>  存在cipherparams对象下的iv属性中</p>
+</li>
+</ul>
+<h4 id="解密的完整流程"><a href="#解密的完整流程" class="headerlink" title="解密的完整流程"></a>解密的完整流程</h4><ol>
+<li>获取到密文</li>
+<li>获取到向量</li>
+<li>获取到加密时候用的私钥</li>
+<li>校验密码</li>
+<li>输出私钥</li>
+</ol>
+<h4 id="实现代码"><a href="#实现代码" class="headerlink" title="实现代码"></a>实现代码</h4><pre><code>WalletEntity walletEntity = JsonUtils.deserialize(keyStore, WalletEntity.class);
+        WalletEntity.CryptoBean crypto = walletEntity.getCrypto();
+        byte[] mac = ByteUtil.hexStringToBytes(crypto.getMac());
+        byte[] iv = ByteUtil.hexStringToBytes(crypto.getCipherparams().getIv());
+        byte[] cipherText = ByteUtil.hexStringToBytes(crypto.getCiphertext());
+        byte[] derivedKey;
+
+        WalletEntity.CryptoBean.KdfparamsBean scryptKdfParams = crypto.getKdfparams();
+        int dklen = scryptKdfParams.getDklen();
+        int n = scryptKdfParams.getN();
+        int p = scryptKdfParams.getP();
+        int r = scryptKdfParams.getR();
+        byte[] salt = Numeric.hexStringToByteArray(scryptKdfParams.getSalt());
+        derivedKey = generateDerivedScryptKey(
+                password.getBytes(Charset.forName(&quot;UTF-8&quot;)), salt, n, r, p, dklen);
+        byte[] derivedMac = generateMac(derivedKey, cipherText);
+        if (!Arrays.equals(derivedMac, mac)) {
+            //这对密码校验 验证是否输入的密码正确
+            throw new Exception(&quot;Invalid password provided&quot;);
+        }
+        byte[] encryptKey = Arrays.copyOfRange(derivedKey, 0, 16);
+
+        byte[] privateKey = performCipherOperation(Cipher.DECRYPT_MODE, iv, encryptKey, cipherText);
+        return ByteUtil.toHexString(privateKey);
+</code></pre>
+          </div>
+          <br><br>
+          <div>
+              <p>
+                       
+                      <span class="badge badge-default">#&nbsp;钱包</span>
+                      &nbsp;
+                       
+                      <span class="badge badge-default">#&nbsp;Java</span>
+                      &nbsp;
+                      
+              </p>
+          </div>
+        </div>
+      </div>  
+    </div>
+  </div>
+  <!-- TOC -->
+  
+  <div id="toc">
+    <p class="toc-title"><i class="material-icons" style="vertical-align:middle">toc</i>Toc:</p> 
+    <div id="tocbot"></div>
+  </div>
+
+</div>
+
+
+<br>
+<!-- Comments -->
+<div class="comments" id="comments">
+
+    
+    <div class="disqus" style="width:100%">
+    <div id="disqus_thread"></div>
+    <script>               
+        var disqus_shortname = '';
+        var disqus_config = function () {
+            this.page.url = 'http://yoursite.com/2018/03/25/解析钱包KeyStore文件/'; 
+            this.page.identifier = '/2018/03/25/解析钱包KeyStore文件/';
+        };
+        (function() { 
+            var d = document, s = d.createElement('script');
+            s.type = 'text/javascript';
+            s.src = '//'+disqus_shortname+'.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>                                
+</div>
+
+</div>
+  
+
+<footer class="footer footer-default">
+        <div class="container">
+          <div class="float-left" style="padding: 15px 0;">
+              <b>年轻人不要老熬夜</b>
+          </div>
+          <div class="copyright float-right">
+            &copy;
+            <script>
+              document.write(new Date().getFullYear())
+            </script>&nbsp;<a href="https://hexo.io/zh-cn/" target="_blank">HEXO</a>&nbsp;<i class="material-icons">favorite_border</i>
+            <a href="https://github.com/invom/Material-T" target="_blank">Material-T</a>
+          </div>
+        </div>
+</footer>
+      <!--   Core JS Files   -->
+      <script src="/js/core/jquery.min.js?v=3.2.1"></script>
+      <script src="/js/main.js"></script>
+      <script src="/js/core/popper.min.js"></script>
+      <script src="/js/core/bootstrap-material-design.min.js"></script>
+      <script src="/js/plugins/moment.min.js"></script>
+      <!-- Control Center for Material Kit: parallax effects, scripts for the example pages etc -->
+      <script src="/js/material-kit.min.js?v=2.0.5"></script>
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js"></script>
+        <script src="/js/post.js"></script>
+        <script src="/js/plugins/prettify.js"></script>
+        <script>
+            $(document).ready(function(){
+                $('pre').addClass('prettyprint linenums');
+                prettyPrint();
+            })
+        </script>
+      
+</body>
+</html>

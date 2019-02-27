@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+
+
+
+
+
+
+
+
+
+<head><meta name="generator" content="Hexo 3.8.0">
+    <meta charset="utf-8">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no" name="viewport">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="description" content="description">
+    <meta name="author" content="xiaohei">
+    <meta name="keywords" content="keywords">
+    <title>Java中签名一笔交易并验证 ~ 小黑的技术屋</title>
+    <link rel="stylesheet" href="/css/Material_Icons.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/main.css">
+    
+        <link rel="stylesheet" href="/css/post.css">
+        
+            <link rel="stylesheet" href="/css/Prettify/tomorrow-night-eighties.min.css">
+        
+    
+</head>
+
+<body class=" sidebar-collapse">
+<nav class="navbar navbar-transparent navbar-color-on-scroll fixed-top navbar-expand-lg" color-on-scroll="100" id="sectionsNav">
+    <div class="container">
+        <div class="navbar-translate">
+            <a class="navbar-brand" href="/">
+                小黑的技术屋</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="navbar-toggler-icon"></span>
+                <span class="navbar-toggler-icon"></span>
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ml-auto">
+                    
+                        
+                            <li class="nav-item">
+                                <a class="nav-link" href="/archives/">
+                                    archives
+                                </a>
+                            </li>
+                        
+                            <li class="nav-item">
+                                <a class="nav-link" href="/about/">
+                                    about
+                                </a>
+                            </li>
+                        
+                    
+                    
+                        
+                            <li class="nav-item">
+                                <a class="nav-link" rel="tooltip" title data-placement="bottom" href="https://github.com/ciscolxh" target="_blank" data-original-title="See me here">
+                                    <i class="fa fa-github"></i>
+                                </a>
+                            </li>
+                        
+                            <li class="nav-item">
+                                <a class="nav-link" rel="tooltip" title data-placement="bottom" href="https://twitter.com/" target="_blank" data-original-title="See me here">
+                                    <i class="fa fa-twitter"></i>
+                                </a>
+                            </li>
+                        
+                    
+                </ul>
+            </div>
+    </div>
+</nav>
+    
+  <div class="page-header header-filter" data-parallax="false" style="background-image: url('/img/post-banner.jpg'); height: 70vh;">
+    
+      <div class="container">
+        <h1 class="title text-center post_title">Java中签名一笔交易并验证</h1>
+        <p class="text-center"><b>Sunday, March 18th 2018, 11:29 am</b></p>
+      </div>
+    
+  </div>
+
+  
+  
+  
+    <div class="row" style="margin: 0 0 0; z-index: 999;">
+  <div class="col-md-8 offset-md-1">
+    <div class="main main-raised">
+      <div class="container">
+        <div class="section">
+          <div class="post_content">
+              <h3 id="Java中签名一笔交易并验证"><a href="#Java中签名一笔交易并验证" class="headerlink" title="Java中签名一笔交易并验证"></a>Java中签名一笔交易并验证</h3><blockquote>
+<p>上一节讲了Java中创建钱包，这一节我们讲如何在Java中签名一笔交易</p>
+</blockquote>
+<p>准备工作就不做详细介绍了</p>
+<ul>
+<li>集成Java的环境查看<a href="https://github.com/ethereum/ethereumj" target="_blank" rel="noopener">这里</a></li>
+<li>搭建测试的私链查看<a href="http://c60block.com/2018/03/16/%E9%83%A8%E7%BD%B2%E4%BB%A5%E5%A4%AA%E5%9D%8A%E7%A7%81%E6%9C%89%E9%93%BE%E5%B9%B6%E6%8C%96%E7%9F%BF/" target="_blank" rel="noopener">这里</a></li>
+</ul>
+<p>直接切入重点。包里给我们提供了这样的一个方法，来构造一笔交易。</p>
+<pre><code> public Transaction(byte[] nonce, byte[] gasPrice, byte[] gasLimit, byte[] receiveAddress, byte[] value, byte[] data, Integer chainId) {
+        this.chainId = null;
+        this.parsed = false;
+        this.nonce = nonce;
+        this.gasPrice = gasPrice;
+        this.gasLimit = gasLimit;
+        this.receiveAddress = receiveAddress;
+        if(ByteUtil.isSingleZero(value)) {
+            this.value = ByteUtil.EMPTY_BYTE_ARRAY;
+        } else {
+            this.value = value;
+        }
+
+        this.data = data;
+        this.chainId = chainId;
+        if(receiveAddress == null) {
+            this.receiveAddress = ByteUtil.EMPTY_BYTE_ARRAY;
+        }
+
+        this.parsed = true;
+    }
+</code></pre><h4 id="以上参数是什么意思呢？"><a href="#以上参数是什么意思呢？" class="headerlink" title="以上参数是什么意思呢？"></a>以上参数是什么意思呢？</h4><ul>
+<li>nonce 交易序列号，交易序列号默认是0，每增加一笔交易nonce+1</li>
+<li>gasgasLimit 通常我们说的gas</li>
+<li>gasPrice 单位gas需要的价格</li>
+<li>receiverAddress 接收者的地址</li>
+<li>value 要转的代币</li>
+<li>data eth交易可以为空字符串。</li>
+<li>chainId 网络id，主网络是1  我这里测试网络配置了999，根据自身私链设置。</li>
+</ul>
+<p>需要注意的是：这里的交易单位都是wei，单位转换参考下表。</p>
+<table>
+<thead>
+<tr>
+<th>Unit</th>
+<th>Wei Value</th>
+<th>Wei</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>wei</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Kwei (babbage)</td>
+<td>1e3 wei</td>
+<td>1,000</td>
+</tr>
+<tr>
+<td>Mwei (lovelace)</td>
+<td>1e6 wei</td>
+<td>1000,000</td>
+</tr>
+<tr>
+<td>Gwei (shannon)</td>
+<td>1e9 wei</td>
+<td>1,000,000,000</td>
+</tr>
+<tr>
+<td>microether (szabo)</td>
+<td>1e12 wei</td>
+<td>1,000,000,000,000</td>
+</tr>
+<tr>
+<td>milliether (finney)</td>
+<td>1e15 wei</td>
+<td>1,000,000,000,000,000</td>
+</tr>
+<tr>
+<td>ether</td>
+<td>1e18 wei</td>
+<td>1,000,000,000,000,000,000</td>
+</tr>
+</tbody>
+</table>
+<p>知道这些概念后我们就可以签名一笔交易。</p>
+<p>现在我们模拟从accounts[0]地址给accounts[1]地址发送一笔交易，数额为1eth。并且携带了交易信息。</p>
+<ol>
+<li>首先获取nonce值</li>
+</ol>
+<pre><code>&gt; eth.getTransactionCount(eth.accounts[0])
+0
+&gt; 
+</code></pre><blockquote>
+<p>得到nonce为0</p>
+</blockquote>
+<ol start="2">
+<li>获取gas</li>
+</ol>
+<pre><code>&gt; eth.estimateGas({from:eth.accounts[0],to:eth.accounts[1],data:&quot;0x0000000000000000000000001b2fdc6e4453fcc9f0e115c8bc8320b1e084af5f000000000000000000000000000000000000000000000000000001d1a94a2000&quot;,value:5000000000000000000})
+22856
+</code></pre><blockquote>
+<p>得到gas为22856</p>
+</blockquote>
+<ol start="3">
+<li>获取推荐的gasPrice</li>
+</ol>
+<pre><code>&gt; eth.gasPrice
+18000000000
+</code></pre><ol start="4">
+<li>获取接收者的地址</li>
+</ol>
+<pre><code>&gt; eth.accounts[0]
+&quot;0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826&quot;
+&gt; eth.accounts[1]
+&quot;0x94e94dcab84ad8805c2ebb843c1cf06393cca620&quot;
+&gt; 
+</code></pre><blockquote>
+<p>当前我在私有链上导入两个地址，然后用”0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826”这个地址挖矿，挖到币发送给”0x94e94dcab84ad8805c2ebb843c1cf06393cca620”<br>所以获取到的接收地址为：==”0x94e94dcab84ad8805c2ebb843c1cf06393cca620”==</p>
+</blockquote>
+<ol start="5">
+<li>data在以太坊交易中可以为“”，这里是做测试我随便填了一组字符串。</li>
+<li>value为1eth，上面说了这里交易设置的值为wei，所以这里是1000000000000000000</li>
+<li>chainId为私有链配置的网络id我这里为999</li>
+</ol>
+<p>还有在签名的时候需要用到私钥。我这里测试账号的私钥为”c85ef7d79691fe79573b1a7064c19c1a9819ebdbd1faaab1a8ec92344438aaf4”</p>
+<p>接下来我们对需要发起的这笔交易进行签名。</p>
+<pre><code>String s =&quot;0000000000000000000000001b2fdc6e4453fcc9f0e115c8bc8320b1e084af5f000000000000000000000000000000000000000000000000000001d1a94a2000&quot;;
+        BigInteger bigInteger =  new BigInteger(&quot;94e94dcab84ad8805c2ebb843c1cf06393cca620&quot;,16);
+        //nonce
+        byte[] nonce = ByteUtil.intToBytesNoLeadZeroes(0);
+        //
+        byte[] gasPrice = ByteUtil.bigIntegerToBytes(new BigInteger(&quot;18000000000&quot;));
+        //
+        byte[] gas = ByteUtil.longToBytesNoLeadZeroes(22856);
+        //
+        byte[] address = ByteUtil.bigIntegerToBytes(bigInteger);
+        //交易金额
+        byte[] value = ByteUtil.bigIntegerToBytes(new BigInteger(&quot;1000000000000000000&quot;));
+        //字符串转成数组上传
+        byte[] data = ByteUtil.hexStringToBytes(s);
+        Transaction tx = new Transaction(
+                nonce,
+                //
+                gasPrice,
+                //gas限度
+                gas,
+                //接收者地址
+                address,
+                //发送的金额
+                value,
+                //携带消息
+                data,
+                //发送到主链当中
+                999
+        );
+
+        //开始签名
+        tx.sign(ECKey.fromPrivate(new BigInteger(&quot;c85ef7d79691fe79573b1a7064c19c1a9819ebdbd1faaab1a8ec92344438aaf4&quot;,16)));
+        byte[] rawTx = tx.getEncoded();
+        //打印出签名后的值
+        System.out.println(&quot;0x&quot;+ Hex.toHexString(rawTx));
+</code></pre><pre><code>得到签名后的数据为：
+0xf8af80850430e234008259489494e94dcab84ad8805c2ebb843c1cf06393cca620880de0b6b3a7640000b8400000000000000000000000001b2fdc6e4453fcc9f0e115c8bc8320b1e084af5f000000000000000000000000000000000000000000000000000001d1a94a20008207f2a066674d401df4f4150f0650a54e3932308cbe5f121bf5b42fbfc7b0fb8d7ca0d7a04d575c545ad23fb91f71091af2c7807a88eff3de2b2604742e1188ce2c0bc216
+</code></pre><p>然后我们在这私有链上广播出去这笔交易看是否签名正确。</p>
+<pre><code>&gt; eth.sendRawTransaction(&quot;0xf8af80850430e234008259489494e94dcab84ad8805c2ebb843c1cf06393cca620880de0b6b3a7640000b8400000000000000000000000001b2fdc6e4453fcc9f0e115c8bc8320b1e084af5f000000000000000000000000000000000000000000000000000001d1a94a20008207f2a066674d401df4f4150f0650a54e3932308cbe5f121bf5b42fbfc7b0fb8d7ca0d7a04d575c545ad23fb91f71091af2c7807a88eff3de2b2604742e1188ce2c0bc216&quot;)
+INFO [03-17|08:13:31]Submitted transaction                    fullhash=0x256b52bb9995e95c51065cef83e8e7170dd934cb77e174a8999f0c3d674c78e7 recipient=0x94E94dcab84Ad8805c2EbB843C1cf06393cca620
+&quot;0x256b52bb9995e95c51065cef83e8e7170dd934cb77e174a8999f0c3d674c78e7&quot;
+</code></pre><p>我们查看accounts[1]地址现在是否收到了1eth</p>
+<pre><code>&gt; eth.getBalance(eth.accounts[1])
+1000000000000000000
+&gt; web3.fromWei(eth.getBalance(eth.accounts[1]),&quot;ether&quot;)
+1
+</code></pre><p>查看交易结果</p>
+<pre><code>&gt; eth.getTransaction(&quot;0x256b52bb9995e95c51065cef83e8e7170dd934cb77e174a8999f0c3d674c78e7&quot;)
+{
+  blockHash: &quot;0x53bb7e8ef200dfa7dd2e72cba30bc9bcfb9e2de7bb49da1c35f49dbd18dd7c14&quot;,
+  blockNumber: 4,
+  from: &quot;0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826&quot;,
+  gas: 22856,
+  gasPrice: 18000000000,
+  hash: &quot;0x256b52bb9995e95c51065cef83e8e7170dd934cb77e174a8999f0c3d674c78e7&quot;,
+  input: &quot;0x0000000000000000000000001b2fdc6e4453fcc9f0e115c8bc8320b1e084af5f000000000000000000000000000000000000000000000000000001d1a94a2000&quot;,
+  nonce: 0,
+  r: &quot;0x66674d401df4f4150f0650a54e3932308cbe5f121bf5b42fbfc7b0fb8d7ca0d7&quot;,
+  s: &quot;0x4d575c545ad23fb91f71091af2c7807a88eff3de2b2604742e1188ce2c0bc216&quot;,
+  to: &quot;0x94e94dcab84ad8805c2ebb843c1cf06393cca620&quot;,
+  transactionIndex: 0,
+  v: &quot;0x7f2&quot;,
+  value: 1000000000000000000
+}
+</code></pre><p>由此结果可以验证我们签名的交易正确。</p>
+
+          </div>
+          <br><br>
+          <div>
+              <p>
+                       
+                      <span class="badge badge-default">#&nbsp;钱包</span>
+                      &nbsp;
+                       
+                      <span class="badge badge-default">#&nbsp;Java</span>
+                      &nbsp;
+                       
+                      <span class="badge badge-default">#&nbsp;区块链</span>
+                      &nbsp;
+                      
+              </p>
+          </div>
+        </div>
+      </div>  
+    </div>
+  </div>
+  <!-- TOC -->
+  
+  <div id="toc">
+    <p class="toc-title"><i class="material-icons" style="vertical-align:middle">toc</i>Toc:</p> 
+    <div id="tocbot"></div>
+  </div>
+
+</div>
+
+
+<br>
+<!-- Comments -->
+<div class="comments" id="comments">
+
+    
+    <div class="disqus" style="width:100%">
+    <div id="disqus_thread"></div>
+    <script>               
+        var disqus_shortname = '';
+        var disqus_config = function () {
+            this.page.url = 'http://yoursite.com/2018/03/18/Java中签名一笔交易并验证/'; 
+            this.page.identifier = '/2018/03/18/Java中签名一笔交易并验证/';
+        };
+        (function() { 
+            var d = document, s = d.createElement('script');
+            s.type = 'text/javascript';
+            s.src = '//'+disqus_shortname+'.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>                                
+</div>
+
+</div>
+  
+
+<footer class="footer footer-default">
+        <div class="container">
+          <div class="float-left" style="padding: 15px 0;">
+              <b>年轻人不要老熬夜</b>
+          </div>
+          <div class="copyright float-right">
+            &copy;
+            <script>
+              document.write(new Date().getFullYear())
+            </script>&nbsp;<a href="https://hexo.io/zh-cn/" target="_blank">HEXO</a>&nbsp;<i class="material-icons">favorite_border</i>
+            <a href="https://github.com/invom/Material-T" target="_blank">Material-T</a>
+          </div>
+        </div>
+</footer>
+      <!--   Core JS Files   -->
+      <script src="/js/core/jquery.min.js?v=3.2.1"></script>
+      <script src="/js/main.js"></script>
+      <script src="/js/core/popper.min.js"></script>
+      <script src="/js/core/bootstrap-material-design.min.js"></script>
+      <script src="/js/plugins/moment.min.js"></script>
+      <!-- Control Center for Material Kit: parallax effects, scripts for the example pages etc -->
+      <script src="/js/material-kit.min.js?v=2.0.5"></script>
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js"></script>
+        <script src="/js/post.js"></script>
+        <script src="/js/plugins/prettify.js"></script>
+        <script>
+            $(document).ready(function(){
+                $('pre').addClass('prettyprint linenums');
+                prettyPrint();
+            })
+        </script>
+      
+</body>
+</html>
