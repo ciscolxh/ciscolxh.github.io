@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+
+
+
+
+
+
+
+
+
+<head><meta name="generator" content="Hexo 3.8.0">
+    <meta charset="utf-8">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no" name="viewport">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="description" content="description">
+    <meta name="author" content="xiaohei">
+    <meta name="keywords" content="keywords">
+    <title>密码学之对称密码 ~ 小黑的技术屋</title>
+    <link rel="stylesheet" href="/css/Material_Icons.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/main.css">
+    
+        <link rel="stylesheet" href="/css/post.css">
+        
+            <link rel="stylesheet" href="/css/Prettify/tomorrow-night-eighties.min.css">
+        
+    
+</head>
+
+<body class=" sidebar-collapse">
+<nav class="navbar navbar-transparent navbar-color-on-scroll fixed-top navbar-expand-lg" color-on-scroll="100" id="sectionsNav">
+    <div class="container">
+        <div class="navbar-translate">
+            <a class="navbar-brand" href="/">
+                小黑的技术屋</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="navbar-toggler-icon"></span>
+                <span class="navbar-toggler-icon"></span>
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ml-auto">
+                    
+                        
+                            <li class="nav-item">
+                                <a class="nav-link" href="/archives/">
+                                    archives
+                                </a>
+                            </li>
+                        
+                            <li class="nav-item">
+                                <a class="nav-link" href="/about/">
+                                    about
+                                </a>
+                            </li>
+                        
+                    
+                    
+                        
+                            <li class="nav-item">
+                                <a class="nav-link" rel="tooltip" title data-placement="bottom" href="https://github.com/ciscolxh" target="_blank" data-original-title="See me here">
+                                    <i class="fa fa-github"></i>
+                                </a>
+                            </li>
+                        
+                            <li class="nav-item">
+                                <a class="nav-link" rel="tooltip" title data-placement="bottom" href="https://twitter.com/" target="_blank" data-original-title="See me here">
+                                    <i class="fa fa-twitter"></i>
+                                </a>
+                            </li>
+                        
+                    
+                </ul>
+            </div>
+    </div>
+</nav>
+    
+  <div class="page-header header-filter" data-parallax="false" style="background-image: url('/img/post-banner.jpg'); height: 70vh;">
+    
+      <div class="container">
+        <h1 class="title text-center post_title">密码学之对称密码</h1>
+        <p class="text-center"><b>Friday, August 24th 2018, 11:58 pm</b></p>
+      </div>
+    
+  </div>
+
+  
+  
+  
+    <div class="row" style="margin: 0 0 0; z-index: 999;">
+  <div class="col-md-8 offset-md-1">
+    <div class="main main-raised">
+      <div class="container">
+        <div class="section">
+          <div class="post_content">
+              <p>在将对称密码前我们先看一下以异或</p>
+<blockquote>
+<p>异或：</p>
+</blockquote>
+<pre><code>异或是0和1的计算 
+0 XOR 0 = 0
+0 XOR 1 = 1
+1 XOR 0 = 1
+1 XOR 1 = 0
+</code></pre><p><strong>可以理解为遇到0不变，遇到1改变</strong></p>
+<blockquote>
+<p>我们再看</p>
+</blockquote>
+<pre><code>0 XOR 0 = 0
+1 XOR 1 = 0
+1 XOR 0 = 1
+0 XOR 1 = 1
+</code></pre><p><strong>发现：</strong> 异或后的数再反向异或还是原来的数</p>
+<p><strong>编码：</strong></p>
+<pre><code>计算机在处理的过程中最后都把数据编码成01了
+这就意思我们可以这样用这种方式来加密我们的数据
+</code></pre><h3 id="DES"><a href="#DES" class="headerlink" title="DES"></a>DES</h3><pre><code>DES是一种对称密钥加密块密码算法，1976年被美国联邦政府的国家标准局确定为联邦资料处理标准（FIPS），
+随后在国际上广泛流传开来。它基于使用56位密钥的对称算法。
+这个算法因为包含一些机密设计元素，
+相对短的密钥长度以及怀疑内含美国国家安全局（NSA）的后门而在开始时有争议，
+DES因此受到了强烈的学院派式的审查，
+并以此推动了现代的块密码及其密码分析的发展。
+</code></pre><p><strong>加密过程</strong></p>
+<pre><code>DES是每次加密64比特然后左右分两部分，
+通过右边的部分计算出一个子秘钥 
+然后用右边的部分再和左边的函数进行XOR运算。
+</code></pre><p><strong>图示</strong></p>
+<p><img src="/images/des201808251.png" alt="image"></p>
+<p>这种算法在DES破译比赛中</p>
+<pre><code>1997年花了96天破译
+1998年第一次花了41天破译
+1998年第二次花了56小时
+1999年花了22小时15分钟就被破解了
+</code></pre><p>为了防止暴力破解然后就开发了出来三重DES</p>
+<p><strong>图示</strong></p>
+<p><img src="/images/des201808252.png" alt="image"></p>
+<pre><code>由图我们可以看出来三重加密DES并不是进行了三次DES加密
+而是第一次用DES加密 第二次进行DES解密  然后第三次进行了又是进行的加密
+这样做的目的是为了兼容DES的
+如果我们使用相同的秘钥就能兼容DES
+一次加密后相当于DES加密 一次DES解密后相当于还原了明文
+然后再进行一次加密，就相到于普通的DES一次加密。
+</code></pre><h3 id="AES"><a href="#AES" class="headerlink" title="AES"></a>AES</h3><pre><code>AES在密码学中又称Rijndael加密法，是美国联邦政府采用的一种区块加密标准。
+这个标准用来替代原先的DES，已经被多方分析且广为全世界所使用
+。经过五年的甄选流程，高级加密标准由美国国家标准与技术研究院（NIST）于2001年11月26日发布于FIPS PUB 197，
+并在2002年5月26日成为有效的标准。
+2006年，高级加密标准已然成为对称密钥加密中最流行的算法之一。
+</code></pre><p><strong>加密过程</strong></p>
+<pre><code>它使用也是分组加密的算法  每一组输入的是128比特也就是16位进行操作，
+首先进行了简单的替换，
+又进行平移，
+再与秘钥进行XOR运算得到了加密的数据
+</code></pre><p><strong>图示</strong></p>
+<p><img src="/images/aes201808251.png" alt="image"></p>
+<p>上面说DES和AES加密都是用固定的长度加密，如果想要加密任意长度的密码 就需要分分组加密，<br>至于每一组用什么秘钥加密，这里就用到了模式</p>
+<p><strong>模式：</strong></p>
+<ol>
+<li>ECB电子密码本模式</li>
+<li>CBC密码分组链接模式</li>
+<li>CFB密文反馈模式</li>
+<li>OFB输出反馈模式</li>
+<li>CTR计数器模式</li>
+</ol>
+<h4 id="ECB电子密码本模式"><a href="#ECB电子密码本模式" class="headerlink" title="ECB电子密码本模式"></a>ECB电子密码本模式</h4><pre><code>其中ECB模式就是直接把加密内容分组  然后对齐进行加密
+</code></pre><p><strong>图示</strong></p>
+<p><img src="/images/ebc201808251.png" alt="image"></p>
+<pre><code>解密时候直接把每一组反向操作就会还原。这就会出现一个严重的缺陷，
+使用相同的密文进行加密后 ，密文也是有规律的。
+反复观察密文中的规律可以依此来找线索破解密码 
+所以不推荐大家在开发使用此加密模式。
+
+比如：
+付款人：张三
+收款人：李四
+转账金额：10BTC
+
+收款人，付款人这是有规律的
+可以就算不知道加密内容也可以看出来是
+付款人:XXX
+收款人:XXX
+转账金额：XXX
+
+把付款人和收款人的信息对调后  就是李四给张三支付十个BTC了
+</code></pre><h4 id="CBC模式"><a href="#CBC模式" class="headerlink" title="CBC模式"></a>CBC模式</h4><pre><code>CBC模式要初始化一个向量然后用向量明文和向量进行了加密操作得出密文分组，
+再把密文分组作为加密参数和下一个进行XOR操作。
+像一条链连在一起 所以叫分组链接模式。
+</code></pre><p><strong>图示</strong></p>
+<p><img src="/images/cbc201808251.png" alt="image"></p>
+<pre><code>这里比ECB模式多一个初始化向量IV，这个初始化话向量需要自己提前准备。
+有的人使用的是直接在代码中自己写了一个初始化向量，
+也可以通过算法通过密码计算成一个随机数然后在这个随机数截取固定的长度作为向量。
+</code></pre><h4 id="CFB模式"><a href="#CFB模式" class="headerlink" title="CFB模式"></a>CFB模式</h4><p><img src="/images/cfb201808251.png" alt="image"></p>
+<pre><code>CFB模式先把向量进行加密，然后再把密文通过于明文进行XOR运算然后加密 得到密文
+</code></pre><p>OFB模式是</p>
+<p><img src="/images/ofb201808251.png" alt="image"></p>
+<pre><code>OFB模式是生成一个初始化的向量，然后再把初始化向量进行加密，再与明文进行XOR运算，第二组加密是将上一组的加密内容在加密，与第二组的明文进行加密。依次类推
+</code></pre><h4 id="CTR模式"><a href="#CTR模式" class="headerlink" title="CTR模式"></a>CTR模式</h4><pre><code>CTR 模式是将逐次累加的计数器进行加密生成密文的
+</code></pre><p><img src="/images/ctb201808251.png" alt="image"></p>
+
+          </div>
+          <br><br>
+          <div>
+              <p>
+                       
+                      <span class="badge badge-default">#&nbsp;密码</span>
+                      &nbsp;
+                      
+              </p>
+          </div>
+        </div>
+      </div>  
+    </div>
+  </div>
+  <!-- TOC -->
+  
+  <div id="toc">
+    <p class="toc-title"><i class="material-icons" style="vertical-align:middle">toc</i>Toc:</p> 
+    <div id="tocbot"></div>
+  </div>
+
+</div>
+
+
+<br>
+<!-- Comments -->
+<div class="comments" id="comments">
+
+    
+    <div class="disqus" style="width:100%">
+    <div id="disqus_thread"></div>
+    <script>               
+        var disqus_shortname = '';
+        var disqus_config = function () {
+            this.page.url = 'http://yoursite.com/2018/08/24/密码学之对称密码/'; 
+            this.page.identifier = '/2018/08/24/密码学之对称密码/';
+        };
+        (function() { 
+            var d = document, s = d.createElement('script');
+            s.type = 'text/javascript';
+            s.src = '//'+disqus_shortname+'.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>                                
+</div>
+
+</div>
+  
+
+<footer class="footer footer-default">
+        <div class="container">
+          <div class="float-left" style="padding: 15px 0;">
+              <b>年轻人不要老熬夜</b>
+          </div>
+          <div class="copyright float-right">
+            &copy;
+            <script>
+              document.write(new Date().getFullYear())
+            </script>&nbsp;<a href="https://hexo.io/zh-cn/" target="_blank">HEXO</a>&nbsp;<i class="material-icons">favorite_border</i>
+            <a href="https://github.com/invom/Material-T" target="_blank">Material-T</a>
+          </div>
+        </div>
+</footer>
+      <!--   Core JS Files   -->
+      <script src="/js/core/jquery.min.js?v=3.2.1"></script>
+      <script src="/js/main.js"></script>
+      <script src="/js/core/popper.min.js"></script>
+      <script src="/js/core/bootstrap-material-design.min.js"></script>
+      <script src="/js/plugins/moment.min.js"></script>
+      <!-- Control Center for Material Kit: parallax effects, scripts for the example pages etc -->
+      <script src="/js/material-kit.min.js?v=2.0.5"></script>
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js"></script>
+        <script src="/js/post.js"></script>
+        <script src="/js/plugins/prettify.js"></script>
+        <script>
+            $(document).ready(function(){
+                $('pre').addClass('prettyprint linenums');
+                prettyPrint();
+            })
+        </script>
+      
+</body>
+</html>
