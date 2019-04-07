@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+
+
+
+
+
+
+
+
+
+<head><meta name="generator" content="Hexo 3.8.0">
+    <meta charset="utf-8">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no" name="viewport">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="description" content="description">
+    <meta name="author" content="xiaohei">
+    <meta name="keywords" content="keywords">
+    <title>自定义View之GestureDetector ~ 小黑的技术屋</title>
+    <link rel="stylesheet" href="/css/Material_Icons.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/main.css">
+    
+        <link rel="stylesheet" href="/css/post.css">
+        
+            <link rel="stylesheet" href="/css/Prettify/tomorrow-night-eighties.min.css">
+        
+    
+</head>
+
+<body class=" sidebar-collapse">
+<nav class="navbar navbar-transparent navbar-color-on-scroll fixed-top navbar-expand-lg" color-on-scroll="100" id="sectionsNav">
+    <div class="container">
+        <div class="navbar-translate">
+            <a class="navbar-brand" href="/">
+                小黑的技术屋</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="navbar-toggler-icon"></span>
+                <span class="navbar-toggler-icon"></span>
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ml-auto">
+                    
+                        
+                            <li class="nav-item">
+                                <a class="nav-link" href="/archives/">
+                                    archives
+                                </a>
+                            </li>
+                        
+                            <li class="nav-item">
+                                <a class="nav-link" href="/about/">
+                                    about
+                                </a>
+                            </li>
+                        
+                    
+                    
+                        
+                            <li class="nav-item">
+                                <a class="nav-link" rel="tooltip" title data-placement="bottom" href="https://github.com/ciscolxh" target="_blank" data-original-title="See me here">
+                                    <i class="fa fa-github"></i>
+                                </a>
+                            </li>
+                        
+                            <li class="nav-item">
+                                <a class="nav-link" rel="tooltip" title data-placement="bottom" href="https://twitter.com/" target="_blank" data-original-title="See me here">
+                                    <i class="fa fa-twitter"></i>
+                                </a>
+                            </li>
+                        
+                    
+                </ul>
+            </div>
+    </div>
+</nav>
+    
+  <div class="page-header header-filter" data-parallax="false" style="background-image: url('/img/post-banner.jpg'); height: 70vh;">
+    
+      <div class="container">
+        <h1 class="title text-center post_title">自定义View之GestureDetector</h1>
+        <p class="text-center"><b>Sunday, April 7th 2019, 11:30 am</b></p>
+      </div>
+    
+  </div>
+
+  
+  
+  
+    <div class="row" style="margin: 0 0 0; z-index: 999;">
+  <div class="col-md-8 offset-md-1">
+    <div class="main main-raised">
+      <div class="container">
+        <div class="section">
+          <div class="post_content">
+              <h1 id="GestureDetector"><a href="#GestureDetector" class="headerlink" title="GestureDetector"></a>GestureDetector</h1><pre><code>在自定义View我们通常要自己重写onTouchEventy来监听手势滑动，实现一些交互功能。
+其实Android已经为我们提供了某些来处理这个监听，比如GestureDetector 
+</code></pre><h1 id="使用方法"><a href="#使用方法" class="headerlink" title="使用方法"></a>使用方法</h1><pre><code>1. GestureDetector.OnDoubleTapListener
+2. 在初始化的时候new一个GestureDetector，
+3. 重写onTouchEvent()让其调用GestureDetector的onTouchEvent()
+</code></pre><h2 id="自定义view实现GestureDetector-OnGestureListener"><a href="#自定义view实现GestureDetector-OnGestureListener" class="headerlink" title="自定义view实现GestureDetector.OnGestureListener"></a>自定义view实现GestureDetector.OnGestureListener</h2><pre><code>接口内回调方法都用注释写在了下边代码里。
+</code></pre><pre><code>public class BarView extends View implements
+    GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
+    public BarView(Context context, @Nullable AttributeSet attrs) {
+        super(context, attrs);
+    }
+
+     /**
+     * @param e  e
+     * @return 这里return true让获取到点击事件。
+     */
+    @Override
+    public boolean onDown(MotionEvent e) {
+        return true;
+    }
+
+    /**
+     * 预点击
+     *
+     * @param e event
+     */
+    @Override
+    public void onShowPress(MotionEvent e) {
+    }
+
+    /**
+     * 每次点击抬起手势都会调用此方法
+     *
+     * @param e event
+     */
+    @Override
+    public boolean onSingleTapUp(MotionEvent e) {
+        return false;
+    }
+
+    /**
+     * 移动 moveTo
+     *
+     * @param e1 起点的手势位置
+     * @param e2 当前的手势位置
+     * @param distanceX X轴移动
+     * @param distanceY Y轴移动
+     */
+    @Override
+    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+        Log.e(TAG, distanceX + &quot;X移动&quot;);
+        Log.e(TAG, distanceY + &quot;Y移动&quot;);
+        return false;
+    }
+
+    /**
+     * 长按点击
+     *
+     * @param e
+     */
+    @Override
+    public void onLongPress(MotionEvent e) {
+        Log.e(TAG, &quot;长按&quot;);
+    }
+
+    /**
+     * 这是计算每秒滑动的速度
+     *
+     * @param e1
+     * @param e2
+     * @param velocityX
+     * @param velocityY
+     * @return
+     */
+    @Override
+    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+        Log.e(TAG, velocityX + &quot;速度&quot;);
+        return false;
+    }
+
+    /**
+     * 单次点击  避免双击误触
+     *
+     * @param e e
+     */
+    @Override
+    public boolean onSingleTapConfirmed(MotionEvent e) {
+        Log.e(TAG, &quot;一次点击&quot;);
+        return false;
+    }
+
+    /**
+     * 双击调用
+     *
+     * @param e e
+     */
+    @Override
+    public boolean onDoubleTap(MotionEvent e) {
+        Log.e(TAG, &quot;双击了&quot;);
+        return false;
+    }
+
+    /**
+     * 双击后还有别的手势操作用这个方法
+     *
+     * @param e e
+     */
+    @Override
+    public boolean onDoubleTapEvent(MotionEvent e) {
+        return false;
+    }
+}
+</code></pre><h2 id="在初始化的时候new一个GestureDetector"><a href="#在初始化的时候new一个GestureDetector" class="headerlink" title="在初始化的时候new一个GestureDetector"></a>在初始化的时候new一个GestureDetector</h2><pre><code>private GestureDetectorCompat gestureDetectorCompat;
+
+public BarView(Context context, @Nullable AttributeSet attrs) {
+        super(context, attrs);
+        gestureDetectorCompat = new GestureDetectorCompat(context, this);
+        gestureDetectorCompat.setOnDoubleTapListener(this);
+}
+</code></pre><h2 id="重写onTouchEvent-让其调用GestureDetector的onTouchEvent"><a href="#重写onTouchEvent-让其调用GestureDetector的onTouchEvent" class="headerlink" title="重写onTouchEvent()让其调用GestureDetector的onTouchEvent()"></a>重写onTouchEvent()让其调用GestureDetector的onTouchEvent()</h2><pre><code>@SuppressLint(&quot;ClickableViewAccessibility&quot;)
+@Override
+public boolean onTouchEvent(MotionEvent event) {
+    return gestureDetectorCompat.onTouchEvent(event);
+}
+</code></pre><h1 id="利用这个控件写一个滑动条"><a href="#利用这个控件写一个滑动条" class="headerlink" title="利用这个控件写一个滑动条"></a>利用这个控件写一个滑动条</h1><h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><pre><code>页面上的部分有：
+    1. 滑动条的底色
+    2. 滑动过滑动条的颜色
+    3. 滑动块的位置
+分析： 
+    通过判断手指按下的位置是否在滑块上
+    如果在滑块上，监听左右滑动然后移动到指定的位置
+    如果单击直接跳到移动的指定位置
+    最后进行绘制
+</code></pre><h3 id="判断点击的位置"><a href="#判断点击的位置" class="headerlink" title="判断点击的位置"></a>判断点击的位置</h3><pre><code>
+    @SuppressLint(&quot;ClickableViewAccessibility&quot;)
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                //按下的位置
+                float downX = event.getX();
+                float downY = event.getY();
+                //判断是否点击到了 滑动条的位置
+                isOnSliderBar = h / 2 - radius &lt; downY &amp;&amp; downY &lt; h / 2 + radius;
+                //判断是否选到了滑动块的位置
+                if (isOnSliderBar) {
+                    onSlider = downX &gt; move - radius &amp;&amp; downX &lt; move + radius;
+                }
+                break;
+            default:
+                break;
+        }
+        return gestureDetectorCompat.onTouchEvent(event);
+    }
+</code></pre><h3 id="如果在滑块上监听左右移动"><a href="#如果在滑块上监听左右移动" class="headerlink" title="如果在滑块上监听左右移动"></a>如果在滑块上监听左右移动</h3><pre><code>     /**
+     * 移动 moveTo
+     *
+     * @param e1 起点的手势位置
+     * @param e2 当前的手势位置
+     * @param distanceX X轴移动
+     * @param distanceY Y轴移动
+     */
+    @Override
+    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+        Log.e(TAG, distanceX + &quot;X移动&quot;);
+        Log.e(TAG, distanceY + &quot;Y移动&quot;);
+        //在滑块上才能滑动
+        if (onSlider) {
+            getMove(e2);
+            invalidate();
+            updateScale();
+        }
+        return false;
+    }
+
+    private void getMove(MotionEvent event) {
+        move = event.getX();
+        if (move &lt; paddingStart) {
+            move = paddingStart;
+        } else if (move &gt; w - 2 * paddingStart) {
+            move = w - paddingStart;
+        }
+    }
+
+    private void updateScale() {
+        scale = (move - paddingStart) / (w - 2 * paddingStart);
+        if (sliderListener != null) {
+            sliderListener.sliderScale(scale);
+        }
+        Log.e(TAG, scale + &quot;当前选中的位置占总共比例&quot;);
+    }
+</code></pre><h3 id="如果是单击跳到指定移动位置"><a href="#如果是单击跳到指定移动位置" class="headerlink" title="如果是单击跳到指定移动位置"></a>如果是单击跳到指定移动位置</h3><pre><code>    /**
+     * 每次点击抬起手势都会调用此方法
+     *
+     * @param e event
+     */
+    @Override
+    public boolean onSingleTapUp(MotionEvent e) {
+        if (isOnSliderBar) {
+            getMove(e);
+            invalidate();
+            updateScale();
+        }
+        Log.e(TAG, &quot;抬起点击&quot;);
+        return false;
+    }
+</code></pre><h3 id="绘制"><a href="#绘制" class="headerlink" title="绘制"></a>绘制</h3><pre><code>    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        //画出滑动块背景
+        paint.setColor(Color.BLUE);
+        canvas.drawLine(paddingStart, h / 2, w - paddingStart, h / 2, paint);
+        //画出滑过的路径
+        paint.setColor(Color.RED);
+        canvas.drawLine(paddingStart, h / 2, move, h / 2, paint);
+
+        //画出滑动块当前位置
+        canvas.drawCircle(move, h / 2, radius, paint);
+
+    }
+</code></pre><h1 id="贴上完整的代码"><a href="#贴上完整的代码" class="headerlink" title="贴上完整的代码"></a>贴上完整的代码</h1><pre><code>/**
+ * 手写一个自定义滑动条
+ *
+ * @author luokes
+ */
+public class BarView extends View implements
+        GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
+    private static final String TAG = &quot;BarView&quot;;
+    /**
+     * 屏幕宽度
+     */
+    private float w;
+    /**
+     * 屏幕高度
+     */
+    private float h;
+    /**
+     * 左边距
+     */
+    private float paddingStart;
+
+    /**
+     * 移动到的位置
+     */
+    private float move;
+    /**
+     * 滑块圆形的半径
+     */
+    private float radius;
+
+    /**
+     * 是否选在滑块上
+     */
+    private boolean onSlider;
+
+    /**
+     * 是否选在滑动条的位置
+     */
+    private boolean isOnSliderBar;
+
+    /**
+     * 抗锯齿画笔
+     */
+    private Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+    /**
+     * 当前比例
+     */
+    float scale;
+
+    private SliderListener sliderListener;
+
+    public void setSliderListener(SliderListener sliderListener) {
+        this.sliderListener = sliderListener;
+    }
+
+    public interface SliderListener {
+        /**
+         * @param scale scale
+         * @return 当前滑到的位置
+         */
+        void sliderScale(float scale);
+    }
+
+    private GestureDetectorCompat gestureDetectorCompat;
+
+    public BarView(Context context, @Nullable AttributeSet attrs) {
+        super(context, attrs);
+        gestureDetectorCompat = new GestureDetectorCompat(context, this);
+        gestureDetectorCompat.setOnDoubleTapListener(this);
+        init(context);
+    }
+
+    private void init(Context context) {
+        paint.setStrokeWidth(20);
+        paint.setStrokeCap(Paint.Cap.ROUND);
+        paddingStart = AutoSizeUtils.dp2px(context, 10);
+        move = paddingStart;
+        radius = paddingStart;
+    }
+
+
+    @Override
+    protected void onSizeChanged(int neww, int newh, int oldw, int oldh) {
+        super.onSizeChanged(neww, newh, oldw, oldh);
+        w = getWidth();
+        h = getHeight();
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        //画出滑动块背景
+        paint.setColor(Color.BLUE);
+        canvas.drawLine(paddingStart, h / 2, w - paddingStart, h / 2, paint);
+        //画出滑过的路径
+        paint.setColor(Color.RED);
+        canvas.drawLine(paddingStart, h / 2, move, h / 2, paint);
+
+        //画出滑动块当前位置
+        canvas.drawCircle(move, h / 2, radius, paint);
+
+    }
+
+    @SuppressLint(&quot;ClickableViewAccessibility&quot;)
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                //按下的位置
+                float downX = event.getX();
+                float downY = event.getY();
+                //判断是否点击到了 滑动条的位置
+                isOnSliderBar = h / 2 - radius &lt; downY &amp;&amp; downY &lt; h / 2 + radius;
+                //判断是否选到了滑动块的位置
+                if (isOnSliderBar) {
+                    onSlider = downX &gt; move - radius &amp;&amp; downX &lt; move + radius;
+                }
+                break;
+            default:
+                break;
+        }
+        return gestureDetectorCompat.onTouchEvent(event);
+    }
+
+    /**
+     * @param e  e
+     * @return 这里return true让获取到点击事件。
+     */
+    @Override
+    public boolean onDown(MotionEvent e) {
+        return true;
+    }
+
+    /**
+     * 预点击
+     *
+     * @param e event
+     */
+    @Override
+    public void onShowPress(MotionEvent e) {
+    }
+
+    /**
+     * 每次点击抬起手势都会调用此方法
+     *
+     * @param e event
+     */
+    @Override
+    public boolean onSingleTapUp(MotionEvent e) {
+        if (isOnSliderBar) {
+            getMove(e);
+            invalidate();
+            updateScale();
+        }
+        Log.e(TAG, &quot;抬起点击&quot;);
+        return false;
+    }
+    /**
+     * 移动 moveTo
+     *
+     * @param e1 起点的手势位置
+     * @param e2 当前的手势位置
+     * @param distanceX X轴移动
+     * @param distanceY Y轴移动
+     */
+    @Override
+    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+        Log.e(TAG, distanceX + &quot;X移动&quot;);
+        Log.e(TAG, distanceY + &quot;Y移动&quot;);
+        //在滑块上才能滑动
+        if (onSlider) {
+            getMove(e2);
+            invalidate();
+            updateScale();
+        }
+        return false;
+    }
+
+    private void getMove(MotionEvent event) {
+        move = event.getX();
+        if (move &lt; paddingStart) {
+            move = paddingStart;
+        } else if (move &gt; w - 2 * paddingStart) {
+            move = w - paddingStart;
+        }
+    }
+
+    private void updateScale() {
+        scale = (move - paddingStart) / (w - 2 * paddingStart);
+        if (sliderListener != null) {
+            sliderListener.sliderScale(scale);
+        }
+        Log.e(TAG, scale + &quot;当前选中的位置占总共比例&quot;);
+    }
+
+    /**
+     * 长按点击
+     *
+     * @param e
+     */
+    @Override
+    public void onLongPress(MotionEvent e) {
+        Log.e(TAG, &quot;长按&quot;);
+    }
+
+    /**
+     * 这是计算每秒滑动的速度
+     *
+     * @param e1
+     * @param e2
+     * @param velocityX
+     * @param velocityY
+     * @return
+     */
+    @Override
+    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+        Log.e(TAG, velocityX + &quot;速度&quot;);
+        return false;
+    }
+
+    /**
+     * 单次点击  避免双击误触
+     *
+     * @param e e
+     */
+    @Override
+    public boolean onSingleTapConfirmed(MotionEvent e) {
+        Log.e(TAG, &quot;一次点击&quot;);
+        return false;
+    }
+
+    /**
+     * 双击调用
+     *
+     * @param e e
+     */
+    @Override
+    public boolean onDoubleTap(MotionEvent e) {
+        Log.e(TAG, &quot;双击了&quot;);
+        return false;
+    }
+
+    /**
+     * 双击后还有别的手势操作用这个方法
+     *
+     * @param e e
+     */
+    @Override
+    public boolean onDoubleTapEvent(MotionEvent e) {
+        return false;
+    }
+
+    public float getScale() {
+         // 这个比例在0到1直接 不符合条件返回0
+        return scale &lt; 0 || scale &gt; 1 ? 0 : scale;
+    }
+
+    /**
+     * 代码设置滑到到的位置
+     *
+     * @param scale scale
+     */
+    public void setScale(float scale) {
+        this.scale = scale;
+        move = (w - 2 * paddingStart) * scale;
+        invalidate();
+    }
+}
+
+</code></pre>
+          </div>
+          <br><br>
+          <div>
+              <p>
+                       
+                      <span class="badge badge-default">#&nbsp;Android</span>
+                      &nbsp;
+                      
+              </p>
+          </div>
+        </div>
+      </div>  
+    </div>
+  </div>
+  <!-- TOC -->
+  
+  <div id="toc">
+    <p class="toc-title"><i class="material-icons" style="vertical-align:middle">toc</i>Toc:</p> 
+    <div id="tocbot"></div>
+  </div>
+
+</div>
+
+
+<br>
+<!-- Comments -->
+<div class="comments" id="comments">
+
+    
+    <div class="disqus" style="width:100%">
+    <div id="disqus_thread"></div>
+    <script>               
+        var disqus_shortname = '';
+        var disqus_config = function () {
+            this.page.url = 'http://yoursite.com/2019/04/07/自定义View之GestureDetector/'; 
+            this.page.identifier = '/2019/04/07/自定义View之GestureDetector/';
+        };
+        (function() { 
+            var d = document, s = d.createElement('script');
+            s.type = 'text/javascript';
+            s.src = '//'+disqus_shortname+'.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>                                
+</div>
+
+</div>
+  
+
+<footer class="footer footer-default">
+        <div class="container">
+          <div class="float-left" style="padding: 15px 0;">
+              <b>年轻人不要老熬夜</b>
+          </div>
+          <div class="copyright float-right">
+            &copy;
+            <script>
+              document.write(new Date().getFullYear())
+            </script>&nbsp;<a href="https://hexo.io/zh-cn/" target="_blank">HEXO</a>&nbsp;<i class="material-icons">favorite_border</i>
+            <a href="https://github.com/invom/Material-T" target="_blank">Material-T</a>
+          </div>
+        </div>
+</footer>
+      <!--   Core JS Files   -->
+      <script src="/js/core/jquery.min.js?v=3.2.1"></script>
+      <script src="/js/main.js"></script>
+      <script src="/js/core/popper.min.js"></script>
+      <script src="/js/core/bootstrap-material-design.min.js"></script>
+      <script src="/js/plugins/moment.min.js"></script>
+      <!-- Control Center for Material Kit: parallax effects, scripts for the example pages etc -->
+      <script src="/js/material-kit.min.js?v=2.0.5"></script>
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.4.2/tocbot.min.js"></script>
+        <script src="/js/post.js"></script>
+        <script src="/js/plugins/prettify.js"></script>
+        <script>
+            $(document).ready(function(){
+                $('pre').addClass('prettyprint linenums');
+                prettyPrint();
+            })
+        </script>
+      
+</body>
+</html>
