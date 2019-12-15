@@ -19,7 +19,7 @@
     <meta name="description" content="description">
     <meta name="author" content="xiaohei">
     <meta name="keywords" content="keywords">
-    <title>生成助记词钱包 ~ 小黑的技术屋</title>
+    <title>Flutter网络请求 ~ 小黑的技术屋</title>
     <link rel="stylesheet" href="/css/Material_Icons.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
     <link rel="stylesheet" href="/css/main.css">
@@ -84,8 +84,8 @@
   <div class="page-header header-filter" data-parallax="false" style="background-image: url('/img/post-banner.jpg'); height: 70vh;">
     
       <div class="container">
-        <h1 class="title text-center post_title">生成助记词钱包</h1>
-        <p class="text-center"><b>Sunday, March 25th 2018, 11:58 pm</b></p>
+        <h1 class="title text-center post_title">Flutter网络请求</h1>
+        <p class="text-center"><b>Sunday, December 15th 2019, 9:46 pm</b></p>
       </div>
     
   </div>
@@ -99,54 +99,66 @@
       <div class="container">
         <div class="section">
           <div class="post_content">
-              <p>刚开始对助记词有一个误解一直认为是助记词是从私钥生成的，私钥生成它导出助记词，助记词然后反向回去生成私钥。</p>
-<p>今天单拿出来研究，才发现正确的流程应该是这样的</p>
-<p><img src="/images/bip201803252337.jpg" alt="image"></p>
-<p>（图片来《自精通比特币（第二版）》）</p>
-<ol>
-<li>随机生成一个128位的熵，然后把熵转为12个单词(参考BIP39)</li>
+              <h5 id="Http请求"><a href="#Http请求" class="headerlink" title="Http请求"></a>Http请求</h5><ol>
+<li>请求行</li>
+<li>请求头</li>
+<li><p>请求体</p>
+<p>想要发起一个http请求就要能对请求构成部分灵活的配置</p>
+<h6 id="如何构造简单GET请求"><a href="#如何构造简单GET请求" class="headerlink" title="如何构造简单GET请求"></a>如何构造简单GET请求</h6><ol>
+<li>新建一个客户端<pre><code>var httpClient = new HttpClient();
+</code></pre></li>
+<li>构建请求的uri<pre><code>Uri uri = Uri.parse(url);
+</code></pre></li>
 </ol>
-<pre><code>byte[] random = new byte[128/8];
-new SecureRandom().nextBytes(random);
-MnemonicCode mnemonicCode = new MnemonicCode();
-List&lt;String&gt; strings = mnemonicCode.toMnemonic(random);
-</code></pre><p><img src="/images/bip201803252339.jpg" alt="image"></p>
-<ol start="2">
-<li>然后通过助记词生成一个种子(参考BIP39)</li>
+</li>
+<li><p>获取请求体</p>
+<pre><code> var request = await httpClient.getUrl(host, port, updatePath);
+</code></pre><blockquote>
+<blockquote>
+<h6 id="完整代码如下"><a href="#完整代码如下" class="headerlink" title="完整代码如下"></a>完整代码如下</h6></blockquote>
+</blockquote>
+<pre><code> var httpClient = new HttpClient();
+ var url = &#39;https://www.wanandroid.com/wxarticle/chapters/json&#39;;
+ Uri uri = Uri.parse(url);
+ var request = await httpClient.getUrl(uri);
+ // 发送成功以后得到响应体
+ var response = await request.close();
+</code></pre><h6 id="Uri还可以以下面这种方式构建灵活配置参数"><a href="#Uri还可以以下面这种方式构建灵活配置参数" class="headerlink" title="Uri还可以以下面这种方式构建灵活配置参数"></a>Uri还可以以下面这种方式构建灵活配置参数</h6><ol>
+<li>构建uri<pre><code>String host = &#39;www.abc.com&#39;;
+int port = 8181;
+String path = &#39;record/circle/getListPage&#39;;
+//get 请求方式uri构建
+Uri uri = Uri(
+  scheme: &#39;http&#39;,
+  host: host,
+  port: port,
+  path: path,
+  queryParameters: {&quot;pageIndex&quot;: &#39;1&#39;, &quot;pageSize&quot;: &#39;10&#39;});
+</code></pre></li>
 </ol>
-<pre><code>byte[] seed = MnemonicCode.toSeed(strings, &quot;&quot;);
-</code></pre><ol start="3">
-<li>将种子生成一个公钥私钥（参考BIP32,BIP44）</li>
+<h6 id="构造PSOT的请求"><a href="#构造PSOT的请求" class="headerlink" title="构造PSOT的请求"></a>构造PSOT的请求</h6><ol>
+<li>新建一个客户端同GET请求一样<pre><code>var httpClient = new HttpClient();
+</code></pre></li>
+<li>新建一个uri<pre><code>Uri uri = Uri(
+  scheme: &#39;http&#39;,
+  host: host,
+  port: port,
+  path: path
+</code></pre></li>
+<li>构建请求体，并给请求体加入请求内容<br><code>`</code><br>var request = await httpClient.post(uri);<br>// 标记请求类型为form请求<br>request.headers.contentType= ContentType(“application”, “x-www-form-urlencoded”);<br>// 将请求内容加入请求头（需要注意的是需要做urlcode编码）<br>request.write(“id=365262&amp;name=%E6%9E%97%E8%8E%89%E8%8E%89&amp;userNumber=linlili&amp;email=110%40qq.com&amp;birthday=2018-12-06&amp;telphone=17004565213”);<br>// 发送成功以后得到响应体<br>var response = await request.close();</li>
 </ol>
-<pre><code>AddressIndex address = BIP44.m().purpose44()
-        .coinType(60)
-        .account(0)
-        .external()
-        .address(0);
-CoinPairDerive coinKeyPair = new CoinPairDerive(extendedKey);
-ExtendedKey child = coinKeyPair.deriveByExtendedKey(address);
-byte[] privateKey = child.getMaster().getPrivate();
-</code></pre><p>既然有了公钥私钥。那么钱包生成不就是简单一下钱包的构造方法不就出来了吗？（参考Web3j）</p>
-<pre><code>ECKeyPair  ecKeyPair = ECKeyPair.create(privateKey);
-Credentials credentials = Credentials.create(ecKeyPair);
-Log.e(&quot;私钥&quot;,Numeric.toHexStringWithPrefix(credentials.getEcKeyPair().getPrivateKey()));
-Log.e(&quot;地址&quot;,credentials.getAddress());
-</code></pre><p>查看结果并导入imtoken对比</p>
-<p><img src="/images/bip201803252342.jpg" alt="image"></p>
-<p><img src="/images/bip201803252344.jpg" alt="image"></p>
+<pre><code>**上面是请的form请求，如果是一个json请求只需要改了请求头里的标记，以及请求内容即可**
+
+</code></pre><p>// 将请求内容加入请求头（需要注意的是需要做urlcode编码）<br>request.headers.contentType = ContentType(‘application’, ‘json’);<br>// form请求request写入是用write json写入是用add，并且需要转为utf8编码<br>Map jsonMap = Map&lt;String,String&gt;();<br>jsonMap[‘projectId’] = ‘1R6LMXvE2vg’;<br>jsonMap[‘name’] = ‘测试修改完成’;<br>jsonMap[‘docId’] = ‘1R6LlkNMjfU’;<br>request.add(utf8.encode(json.encode(jsonMap)));<br><code>`</code></p>
+</li>
+</ol>
 
           </div>
           <br><br>
           <div>
               <p>
                        
-                      <span class="badge badge-default">#&nbsp;钱包</span>
-                      &nbsp;
-                       
-                      <span class="badge badge-default">#&nbsp;Java</span>
-                      &nbsp;
-                       
-                      <span class="badge badge-default">#&nbsp;区块链</span>
+                      <span class="badge badge-default">#&nbsp;Flutter</span>
                       &nbsp;
                       
               </p>
@@ -175,8 +187,8 @@ Log.e(&quot;地址&quot;,credentials.getAddress());
     <script>               
         var disqus_shortname = '';
         var disqus_config = function () {
-            this.page.url = 'http://yoursite.com/2018/03/25/生成助记词钱包/'; 
-            this.page.identifier = '/2018/03/25/生成助记词钱包/';
+            this.page.url = 'http://yoursite.com/2019/12/15/Flutter网络请求/'; 
+            this.page.identifier = '/2019/12/15/Flutter网络请求/';
         };
         (function() { 
             var d = document, s = d.createElement('script');
